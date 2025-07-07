@@ -1,0 +1,51 @@
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqtt-data:/mosquitto/data
+    ports: ["1883:1883"]
+
+  mysql:
+    image: mysql:8.0
+    env_file: ./init/mysql.env
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports: ["3306:3306"]
+
+  influxdb:
+    image: influxdb:2.7
+    env_file: ./init/influx.env
+    volumes:
+      - influx-data:/var/lib/influxdb2
+    ports: ["8086:8086"]
+
+  backend:
+    build: ./backend
+    depends_on:
+      - mysql
+      - influxdb
+      - mqtt
+    ports: ["5000:5000"]
+
+  grafana:
+    image: grafana/grafana-oss:10.4.2
+    depends_on:
+      - influxdb
+      - mysql
+    ports: ["3000:3000"]
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  streamlit:
+    build: ./streamlit
+    depends_on:
+      - backend
+    ports: ["8501:8501"]
+
+volumes:
+  mqtt-data:
+  mysql-data:
+  influx-data:
+  grafana-data:
