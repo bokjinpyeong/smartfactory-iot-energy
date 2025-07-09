@@ -1,0 +1,1 @@
+import{j as s,B as e}from"./index-BxFO6TFv.js";function t(){return s.jsx(e,{children:s.jsxs("div",{className:"p-6",children:[s.jsx("h1",{className:"text-2xl font-bold mb-4",children:"⚡ 실시간 전력 상황"}),s.jsx("p",{children:"실시간으로 측정된 전력 소비 데이터를 시각화하여 보여줍니다."})]})})}export{t as default};

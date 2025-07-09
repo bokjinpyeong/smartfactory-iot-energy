@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 및 회원가입</title>
+</head>
+<body>
+
+<h2>로그인</h2>
+이메일: <input type="text" id="loginEmail"><br>
+비밀번호: <input type="password" id="loginPassword"><br>
+<button onclick="login()">로그인</button>
+
+<h2>회원가입</h2>
+회사명: <input type="text" id="signupCompany"><br>
+이름: <input type="text" id="signupName"><br>
+전화번호: <input type="text" id="signupPhone"><br>
+이메일: <input type="text" id="signupEmail"><br>
+비밀번호: <input type="password" id="signupPassword"><br>
+<button onclick="signup()">회원가입</button>
+
+<script>
+    function login() {
+        fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: document.getElementById("loginEmail").value,
+                password: document.getElementById("loginPassword").value
+            })
+        })
+        .then(res => res.text())
+        .then(alert)
+        .catch(console.error);
+    }
+
+    function signup() {
+        fetch("/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                company: document.getElementById("signupCompany").value,
+                name: document.getElementById("signupName").value,
+                phone: document.getElementById("signupPhone").value,
+                email: document.getElementById("signupEmail").value,
+                password: document.getElementById("signupPassword").value
+            })
+        })
+        .then(res => res.text())
+        .then(alert)
+        .catch(console.error);
+    }
+</script>
+
+</body>
+</html>
