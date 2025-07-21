@@ -29,15 +29,21 @@ jobs:
       - name: Build, tag, and push Docker image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          # 루트의 Dockerfile을 사용해 이미지 빌드
           docker build -t ${{ steps.login-ecr.outputs.registry }}/smartfactory:$IMAGE_TAG .
-          # ECR에 이미지 푸시
           docker push ${{ steps.login-ecr.outputs.registry }}/smartfactory:$IMAGE_TAG
+
+      - name: Render ECS task definition
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs-task-def.json
+          container-name: smartfactory-container
+          image: ${{ steps.login-ecr.outputs.registry }}/smartfactory:${{ github.sha }}
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs-task-def.json
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
           service: smartfactory-service
           cluster: smartfactory-cluster
           wait-for-service-stability: true
