@@ -1,51 +1,50 @@
+version: "3.9"
 
 services:
+  ### 1. MQTT 브로커 ‒ Mosquitto
   mqtt:
     image: eclipse-mosquitto:2.0
+    container_name: mqtt
     volumes:
       - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mqtt-data:/mosquitto/data
-    ports: ["1883:1883"]
+    ports:
+      - "1883:1883"       # TCP
+      - "9001:9001"       # WebSocket(필요 시)
 
+  ### 2. MySQL 데이터베이스
   mysql:
     image: mysql:8.0
-    env_file: ./init/mysql.env
+    container_name: mysql
+    env_file: ./init/mysql.env   # MYSQL_ROOT_PASSWORD 등
     volumes:
       - mysql-data:/var/lib/mysql
-    ports: ["3306:3306"]
+    ports:
+      - "3306:3306"
 
-  influxdb:
-    image: influxdb:2.7
-    env_file: ./init/influx.env
-    volumes:
-      - influx-data:/var/lib/influxdb2
-    ports: ["8086:8086"]
-
+  ### 3. 백엔드(Node.js Express)
   backend:
-    build: ./backend
+    build: ./backend            # ./backend/Dockerfile 필요
     depends_on:
       - mysql
-      - influxdb
       - mqtt
-    ports: ["5000:5000"]
+    env_file: ./backend/.env     # DB·MQTT 접속정보
+    ports:
+      - "5000:5000"              # 외부 5000 → 컨테이너 5000
 
+  ### 4. Grafana
   grafana:
     image: grafana/grafana-oss:10.4.2
+    container_name: grafana
     depends_on:
-      - influxdb
       - mysql
-    ports: ["3000:3000"]
+    ports:
+      - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
-
-  streamlit:
-    build: ./streamlit
-    depends_on:
-      - backend
-    ports: ["8501:8501"]
+      - ./grafana/provisioning:/etc/grafana/provisioning  # (선택)
 
 volumes:
   mqtt-data:
   mysql-data:
-  influx-data:
   grafana-data:

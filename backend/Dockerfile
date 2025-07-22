@@ -1,5 +1,12 @@
-FROM python:3.12-slim
-WORKDIR /code
-RUN pip install fastapi uvicorn[standard]
-COPY app.py .
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000"]
+# --- build 단계 ---
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY backend/package*.json ./
+RUN npm ci
+COPY backend/ .
+# --- run 단계 ---
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=build /app /app
+EXPOSE 5000
+CMD ["npm","start"]
