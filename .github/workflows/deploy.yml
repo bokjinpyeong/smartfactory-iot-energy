@@ -22,4 +22,5 @@ jobs:
           script: |
             cd /home/ubuntu/app
             git pull origin main
+            npm install
             pm2 restart all || pm2 start index.cjs
